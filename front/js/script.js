@@ -1,32 +1,44 @@
-//Récuperer données API
-const url = "http://localhost:3000/api/products";
+//Récupérer les informations des produits dans l'api
+async function getProductsfromApi() {
+  const url = "http://localhost:3000/api/products";
+  const response = await fetch(url);
+  const products = await response.json();
+  return products;
+}
 
-// Inserer les produits dans la page Accueil
-async function getProducts() {
+//Modifier le html
+function generateProductsPage(products) {
+  const section = document.getElementById("items");
+  section.className = "items";
+  const a = document.createElement("a");
+  a.dataset.id = products.id;
+  const kanapImageContent = document.createElement("article");
+  const kanapImage = document.createElement("img");
+  kanapImage.src = products.imageUrl;
+  kanapImage.alt = products.altTxt;
+  const kanapName = document.createElement("h3");
+  h3.className = "productName";
+  kanapName.innerHTML = products.name;
+  const kanapDescription = document.createElement("p");
+  kanapDescription.className = "productDescription";
+  kanapDescription.innerHTML = products.description;
+  kanapImageContent.appendChild(kanapDescription);
+  kanapImageContent.appendChild(kanapName);
+  kanapImageContent.appendChild(kanapImage);
+  a.appendChild(kanapImageContent);
+  section.appendChild(a);
+}
+
+//Afficher les produits
+async function displayProducts() {
+  //Récupérer les informations des produits dans l'api
   try {
-    const response = await fetch(url);
-    const products = await response.json();
-
-    let show = "";
-    for (let kanap of products) {
-      show += `<a href="./product.html?id=${kanap._id}">
-      <article>
-        <img
-          src="${kanap.imageUrl}"
-          alt="${kanap.name}"
-        />
-        <h3 class="productName">${kanap.name}</h3>
-        <p class="productDescription">
-        ${kanap.description}
-        </p>
-      </article>
-      
-    </a>`;
-    }
-    // show += "";
-    document.querySelector("#items").innerHTML = show;
+    const productsContent = getProductsfromApi();
+    const products = await productsContent;
+    generateProductsPage(products);
   } catch (error) {
-    console.log("Erreur : " + error);
+    console.error(error);
   }
 }
-getProducts();
+//Afficher ses informations sur la page Accueil
+displayProducts();
