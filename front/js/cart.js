@@ -83,34 +83,18 @@ async function generateHTML(cart) {
     settingsContent.appendChild(settingsQuantityContent);
     settingsContent.appendChild(deleteContent);
     article.appendChild(settingsContent);
-
-    //Modifier la quantité et qu'elle soit modifiée dans le localstorage
-
-    //Activer l'option supprimer sur la page panier et dans le localstorage
-
-    //Activer le total (quantité et prix) au click
-    const cartTotalContent = document.createElement("section");
-    cartTotalContent.className = "cart";
-    const cartTotalSettings = document.createElement("div");
-    cartTotalSettings.className = "cart__price";
-    const cartTotal = document.createElement("p");
-    cartTotal.innerHTML = "Total (articles)";
-    const cartTotalQuantity = document.createElement("span");
-    cartTotalQuantity.id = "totalQuantity";
-    cartTotalQuantity.setAttribute("value", `${product.quantity}`);
-    const cartTotalPrice = document.createElement("span");
-    cartTotalPrice.id = "totalPrice";
-    cartTotalPrice.setAttribute(
-      "value",
-      `${apiProduct.price * cartTotalQuantity.value} €`
-    );
-    cartTotalQuantity.appendChild(cartTotalPrice);
-    cartTotal.appendChild(cartTotalQuantity);
-    cartTotalSettings.appendChild(cartTotal);
-    cartTotalContent.appendChild(cartTotalSettings);
-    console.log(cartTotalContent);
   }
 }
+
+//Modifier la quantité et qu'elle soit modifiée dans le localstorage
+
+//Activer l'option supprimer sur la page panier et dans le localstorage
+
+//Ecouter la modification de la quantité au click
+
+//Activer le total quantité avec le click
+
+//Activer le total prix après écoute du total quantité
 
 function displayCart() {
   //afficher la page panier
