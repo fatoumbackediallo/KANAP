@@ -16,12 +16,22 @@ function getCartItems() {
 
 async function generateHTML(cart) {
   //Ajouter l'image en modifiant le Html
+  let totalQuantity = 0;
+  let totalPrice = 0;
   for (let product of cart) {
     const kanapImage = document.querySelector("img");
     const response = await fetch(
       `http://localhost:3000/api/products/${product.id}`
     );
     const apiProduct = await response.json();
+
+    //Calcul du total quantité et Prix
+    totalQuantity += parseInt(product.quantity);
+    totalPrice += parseInt(product.quantity) * parseInt(apiProduct.price);
+    const quantityElement = document.getElementById("totalQuantity");
+    quantityElement.innerHTML = totalQuantity;
+    const priceElement = document.getElementById("totalPrice");
+    priceElement.innerHTML = totalPrice;
 
     //Récupérer la section Cart Items
     // créer une balise article, lui donner une class, un data-id et un data-color
@@ -70,6 +80,16 @@ async function generateHTML(cart) {
     productQuantity.setAttribute("min", "1");
     productQuantity.setAttribute("max", "100");
     productQuantity.setAttribute("value", `${product.quantity}`);
+    productQuantity.addEventListener("change", function () {
+      product.quantity = productQuantity.value;
+      if (productQuantity.value < 1 || productQuantity.value > 100) {
+        alert("Choisissez une quantité entre 1 et 100 !");
+      } else if (productQuantity.value >= 1 || productQuantity.value <= 100) {
+        alert("Produit bien ajouté");
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      location.reload();
+    });
 
     //Créer l'option supprimer
     const deleteContent = document.createElement("div");
@@ -83,18 +103,106 @@ async function generateHTML(cart) {
     settingsContent.appendChild(settingsQuantityContent);
     settingsContent.appendChild(deleteContent);
     article.appendChild(settingsContent);
+    deleteContent.addEventListener("click", function () {
+      const newCart = cart.filter(
+        (p) => p.id != product.id || p.color != product.color
+      );
+      localStorage.setItem("cart", JSON.stringify(newCart));
+      location.reload();
+    });
   }
 }
 
-//Modifier la quantité et qu'elle soit modifiée dans le localstorage
+//Soumission du formulaire
+const firstName = document.getElementById("firstName");
+const lastName = document.getElementById("lastName");
+const address = document.getElementById("address");
+const city = document.getElementById("city");
+const email = document.getElementById("email");
 
-//Activer l'option supprimer sur la page panier et dans le localstorage
+const fields = [firstName, lastName, address, city, email];
 
-//Ecouter la modification de la quantité au click
+//Mise en place du
+function selectRegex(orderForm) {
+  const emailRegex = new RegExp(
+    /^([a-zA-Z0-9_\-\.]+)*@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/
+  );
+  const noSpecialCharacters = new RegExp(/^[a-zA-Z0-9\s+]*$/);
 
-//Activer le total quantité avec le click
+  const emailMessage = "Ajouter une adresse mail correcte";
+  const noSpecialCharactersMessage = "Caractères spéciaux non acceptés";
 
-//Activer le total prix après écoute du total quantité
+  if (orderForm === email) {
+    return [emailRegex, emailMessage];
+  } else {
+    return [noSpecialCharacters, noSpecialCharactersMessage];
+  }
+}
+
+function showErrorMessage(orderForm, regex, errorMessage, errorSpan) {
+  errorSpan.innerText = regex.test(orderForm.value) ? "" : errorMessage;
+}
+
+function getErrorMsg(element) {
+  if (element === firstName)
+    return document.getElementById("firstNameErrorMsg");
+  if (element === lastName) return document.getElementById("lastNameErrorMsg");
+  if (element === address) return document.getElementById("addressErrorMsg");
+  if (element === city) return document.getElementById("cityErrorMsg");
+  if (element === email) return document.getElementById("emailErrorMsg");
+  throw new Error();
+}
+function checkInput(orderForm) {
+  const [regex, errorMessage] = selectRegex(orderForm);
+  const errorSpan = getErrorMsg(orderForm);
+  showErrorMessage(orderForm, regex, errorMessage, errorSpan);
+  const result = regex.test(orderForm.value);
+
+  return result;
+}
+
+function e() {
+  fields.forEach(function (orderForm) {
+    orderForm.addEventListener("change", (orderForm) => {
+      checkInput(orderForm.target);
+    });
+  });
+}
+e();
+
+//valider la commande
+function approveOrder() {
+  const cart = getCartFromLocalStorage();
+  const order = {
+    firstName: firstName.value,
+    lastName: lastName.value,
+    address: address.value,
+    city: city.value,
+    email: email.value,
+  };
+  const body = { contact: order, products: cart.map((p) => p.id) };
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  })
+    .then((data) => data.json())
+    .then((order) => {
+      window.location.assign(`confirmation.html?id=${order.orderId}`);
+    });
+}
+
+//afficher les messages d'erreur
+document.getElementById("order").addEventListener("click", (event) => {
+  event.preventDefault();
+  const allFieldsValid = fields.every(checkInput);
+  if (allFieldsValid) {
+    approveOrder();
+  }
+});
 
 function displayCart() {
   //afficher la page panier
