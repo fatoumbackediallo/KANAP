@@ -122,7 +122,18 @@ const email = document.getElementById("email");
 
 const fields = [firstName, lastName, address, city, email];
 
-//Mise en place du
+//Vérifier que tous les champs du formulaire sont remplis
+function emptyFields() {
+  const isNotEmpty = fields.every(
+    (f) => f.value !== undefined && f.value !== null && f.value.trim() !== ""
+  );
+  if (!isNotEmpty) {
+    alert("Veuillez remplir tous les champs");
+  }
+  return isNotEmpty;
+}
+
+//Mise en place du RegExp
 function selectRegex(orderForm) {
   const emailRegex = new RegExp(
     /^([a-zA-Z0-9_\-\.]+)*@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/
@@ -160,7 +171,7 @@ function checkInput(orderForm) {
 
   return result;
 }
-
+//Vérifier que chaque élément du formulaire respecte le Regexp
 function e() {
   fields.forEach(function (orderForm) {
     orderForm.addEventListener("change", (orderForm) => {
@@ -191,6 +202,7 @@ function approveOrder() {
   })
     .then((data) => data.json())
     .then((order) => {
+      localStorage.removeItem("cart");
       window.location.assign(`confirmation.html?id=${order.orderId}`);
     });
 }
@@ -198,8 +210,14 @@ function approveOrder() {
 //afficher les messages d'erreur
 document.getElementById("order").addEventListener("click", (event) => {
   event.preventDefault();
+  const allFieldsFilled = emptyFields();
+  const cart = getCartFromLocalStorage();
+  if (cart.length === 0) {
+    alert("Le panier est vide, Veuillez choisir des articles");
+  }
   const allFieldsValid = fields.every(checkInput);
-  if (allFieldsValid) {
+
+  if (allFieldsValid && allFieldsFilled && cart.length > 0) {
     approveOrder();
   }
 });
