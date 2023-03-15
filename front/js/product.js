@@ -111,7 +111,7 @@ function addProductToCart() {
     //on enregistre le panier
     localStorage.setItem("cart", JSON.stringify(initialCart));
     alert("Produit bien enregistré");
-    window.location.href = `${window.location.origin}/front/html/cart.html`;
+    window.location.href = `cart.html`;
   }
 }
 
